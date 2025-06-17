@@ -1,124 +1,169 @@
--- Storm Hub - Versão Completa com Animação, Categorias, e Funções Troll
--- Feito para Delta Executor e KRNL
+-- Storm Hub Simples - GUI Nativo Roblox com opções completas
 
-local success, Rayfield = pcall(function()
-    return loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
-end)
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
-if not success or type(Rayfield) ~= "table" then
-    warn("Erro ao carregar Rayfield UI. Verifique a conexão ou seu executor.")
-    return
+-- Função para criar texto simples
+local function createText(parent, text, pos, size, color)
+    local label = Instance.new("TextLabel")
+    label.Parent = parent
+    label.Text = text
+    label.TextColor3 = color or Color3.new(1,1,1)
+    label.BackgroundTransparency = 1
+    label.Position = pos
+    label.Size = size
+    label.Font = Enum.Font.SourceSansBold
+    label.TextScaled = true
+    return label
 end
 
-local LoadingScreen = Rayfield:CreateWindow({
-    Name = 'Storm Hub - Loading',
-    LoadingTitle = 'Storm Hub',
-    LoadingSubtitle = 'Carregando... 0%',
-    ConfigurationSaving = { Enabled = false }
-})
-
-for i = 1, 100 do
-    wait(0.05)
-    LoadingScreen:SetLoadingSubtitle('Carregando... ' .. tostring(i) .. '% ⚡')
+-- Função para criar botão simples
+local function createButton(parent, text, pos, size, callback)
+    local button = Instance.new("TextButton")
+    button.Parent = parent
+    button.Text = text
+    button.TextColor3 = Color3.new(1,1,1)
+    button.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    button.Position = pos
+    button.Size = size
+    button.Font = Enum.Font.SourceSansBold
+    button.TextScaled = true
+    button.AutoButtonColor = true
+    button.MouseButton1Click:Connect(callback)
+    return button
 end
 
-local selectedLanguage = nil
+-- Remove GUI antigo se existir
+if playerGui:FindFirstChild("StormHub") then
+    playerGui.StormHub:Destroy()
+end
 
-local LanguageWindow = Rayfield:CreateWindow({
-    Name = 'Storm Hub - Escolha de Idioma',
-    LoadingTitle = 'Selecione o Idioma',
-    LoadingSubtitle = 'Selecione seu idioma preferido',
-    ConfigurationSaving = { Enabled = false }
-})
+-- Criar ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "StormHub"
+screenGui.Parent = playerGui
 
-LanguageWindow:CreateButton({
-    Name = 'Português 🇧🇷',
-    Callback = function()
-        selectedLanguage = 'pt'
-        Rayfield:Notify({
-            Title = 'Idioma',
-            Content = 'Idioma definido para Português.',
-            Duration = 4
-        })
-        LanguageWindow:Destroy()
-        StartHub(selectedLanguage)
+-- Tela Loading
+local loadingFrame = Instance.new("Frame")
+loadingFrame.Size = UDim2.new(0,300,0,150)
+loadingFrame.Position = UDim2.new(0.5,-150,0.5,-75)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+loadingFrame.Parent = screenGui
+
+local loadingText = createText(loadingFrame, "Carregando... 0%", UDim2.new(0,0,0,60), UDim2.new(1,0,0,30), Color3.new(1,1,1))
+
+-- Simular loading
+coroutine.wrap(function()
+    for i=0,100 do
+        loadingText.Text = "Carregando... "..i.."%"
+        wait(0.03)
     end
-})
+    loadingFrame.Visible = false
+    showLanguageSelection()
+end)()
 
-LanguageWindow:CreateButton({
-    Name = 'English 🇺🇸',
-    Callback = function()
-        selectedLanguage = 'en'
-        Rayfield:Notify({
-            Title = 'Language',
-            Content = 'Language set to English.',
-            Duration = 4
-        })
-        LanguageWindow:Destroy()
-        StartHub(selectedLanguage)
-    end
-})
+-- Função para mostrar seleção de idioma
+function showLanguageSelection()
+    local langFrame = Instance.new("Frame")
+    langFrame.Size = UDim2.new(0,300,0,150)
+    langFrame.Position = UDim2.new(0.5,-150,0.5,-75)
+    langFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+    langFrame.Parent = screenGui
 
-function StartHub(language)
+    createText(langFrame, "Selecione o Idioma", UDim2.new(0,0,0,20), UDim2.new(1,0,0,30), Color3.new(1,1,1))
+
+    createButton(langFrame, "Português 🇧🇷", UDim2.new(0.1,0,0.5,0), UDim2.new(0.35,0,0,40), function()
+        langFrame:Destroy()
+        openMainMenu("pt")
+    end)
+
+    createButton(langFrame, "English 🇺🇸", UDim2.new(0.55,0,0.5,0), UDim2.new(0.35,0,0,40), function()
+        langFrame:Destroy()
+        openMainMenu("en")
+    end)
+end
+
+-- Função para abrir menu principal
+function openMainMenu(lang)
     local texts = {
         pt = {
-            hubName = 'Storm Hub',
-            teleport = 'Teleporte',
-            troll = 'Troll',
-            spam = 'Spam Texto'
+            movement = "Movimento",
+            teleport = "Teleporte",
+            troll = "Troll",
+            spam = "Spam Texto",
+            teleport1 = "Teleportar Local 1",
+            teleport2 = "Teleportar Local 2",
+            close = "Fechar",
+            hubname = "Storm Hub"
         },
         en = {
-            hubName = 'Storm Hub',
-            teleport = 'Teleport',
-            troll = 'Troll',
-            spam = 'Text Spam'
+            movement = "Movement",
+            teleport = "Teleport",
+            troll = "Troll",
+            spam = "Text Spam",
+            teleport1 = "Teleport Location 1",
+            teleport2 = "Teleport Location 2",
+            close = "Close",
+            hubname = "Storm Hub"
         }
     }
 
-    local MainWindow = Rayfield:CreateWindow({
-        Name = texts[language].hubName,
-        LoadingTitle = texts[language].hubName,
-        LoadingSubtitle = '',
-        ConfigurationSaving = {
-            Enabled = true,
-            FolderName = 'StormHubData',
-            FileName = 'StormHubConfig'
-        }
-    })
+    local menuFrame = Instance.new("Frame")
+    menuFrame.Size = UDim2.new(0,350,0,300)
+    menuFrame.Position = UDim2.new(0.5,-175,0.5,-150)
+    menuFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    menuFrame.Parent = screenGui
 
-    local TeleportTab = MainWindow:CreateTab({
-        Name = texts[language].teleport,
-        Icon = "🌀"
-    })
+    -- Título
+    createText(menuFrame, texts[lang].hubname, UDim2.new(0,0,0,10), UDim2.new(1,0,0,40), Color3.new(1,1,0))
 
-    TeleportTab:CreateButton({
-        Name = texts[language].teleport .. ' Local 1',
-        Callback = function()
-            game.Players.LocalPlayer.Character:MoveTo(Vector3.new(100, 10, 100))
-        end
-    })
+    -- Botão Movimento (Exemplo simples: só printa)
+    createButton(menuFrame, texts[lang].movement, UDim2.new(0.1,0,0.2,0), UDim2.new(0.8,0,0,40), function()
+        print("Clicou em Movimento")
+        -- Você pode adicionar aqui scripts de movimento depois
+    end)
 
-    TeleportTab:CreateButton({
-        Name = texts[language].teleport .. ' Local 2',
-        Callback = function()
-            game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-100, 10, -100))
-        end
-    })
+    -- Botão Teleporte
+    createButton(menuFrame, texts[lang].teleport, UDim2.new(0.1,0,0.4,0), UDim2.new(0.8,0,0,40), function()
+        -- Criar submenu simples de teleporte
+        local teleportFrame = Instance.new("Frame")
+        teleportFrame.Size = UDim2.new(0,300,0,150)
+        teleportFrame.Position = UDim2.new(0.5,-150,0.5,-75)
+        teleportFrame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+        teleportFrame.Parent = screenGui
 
-    local TrollTab = MainWindow:CreateTab({
-        Name = texts[language].troll,
-        Icon = "😈"
-    })
+        createText(teleportFrame, texts[lang].teleport, UDim2.new(0,0,0,10), UDim2.new(1,0,0,30), Color3.new(1,1,1))
 
-    TrollTab:CreateButton({
-        Name = texts[language].spam,
-        Callback = function()
-            spawn(function()
-                while true do
-                    wait(0.5)
-                    game:GetService('ReplicatedStorage').DefaultChatSystemChatEvents.SayMessageRequest:FireServer('Storm Hub é o melhor! ⚡', 'All')
-                end
-            end)
-        end
-    })
+        createButton(teleportFrame, texts[lang].teleport1, UDim2.new(0.1,0,0.4,0), UDim2.new(0.8,0,0,40), function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(100,10,100)
+            end
+        end)
+
+        createButton(teleportFrame, texts[lang].teleport2, UDim2.new(0.1,0,0.7,0), UDim2.new(0.8,0,0,40), function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(-100,10,-100)
+            end
+        end)
+
+        -- Botão fechar submenu
+        createButton(teleportFrame, texts[lang].close, UDim2.new(0.7,0,0.85,0), UDim2.new(0.25,0,0,30), function()
+            teleportFrame:Destroy()
+        end)
+    end)
+
+    -- Botão Troll - Spam texto
+    createButton(menuFrame, texts[lang].troll, UDim2.new(0.1,0,0.6,0), UDim2.new(0.8,0,0,40), function()
+        spawn(function()
+            while wait(0.5) do
+                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Storm Hub é o melhor! ⚡", "All")
+            end
+        end)
+    end)
+
+    -- Botão fechar menu
+    createButton(menuFrame, texts[lang].close, UDim2.new(0.7,0,0.85,0), UDim2.new(0.25,0,0,30), function()
+        screenGui:Destroy()
+    end)
 end
