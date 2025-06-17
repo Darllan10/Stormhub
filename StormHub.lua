@@ -1,125 +1,98 @@
--- Carregar Rayfield UI
-getgenv().SecureMode = true  -- ativa modo mais seguro (redução de detecção)
-local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source"))()
+-- Criar ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ChaosStyleHub"
+screenGui.Parent = game.CoreGui
 
--- Função principal
-local function StartHub(language)
-    local texts = {
-        pt = {
-            hubName = "Storm Hub - Chaos Style",
-            movement = "Movimento",
-            teleport = "Teleporte",
-            troll = "Troll",
-            speed = "Velocidade x2",
-            teleport1 = "Local 1",
-            teleport2 = "Local 2",
-            spam = "Spam no chat"
-        },
-        en = {
-            hubName = "Storm Hub - Chaos Style",
-            movement = "Movement",
-            teleport = "Teleport",
-            troll = "Troll",
-            speed = "Speed x2",
-            teleport1 = "Location 1",
-            teleport2 = "Location 2",
-            spam = "Chat Spam"
-        }
-    }
+-- Criar Frame principal (janela)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 350, 0, 400)
+frame.Position = UDim2.new(0.5, -175, 0.5, -200)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
+frame.Visible = true
+frame.Parent = screenGui
 
-    local window = Rayfield:CreateWindow({
-        Name = texts[language].hubName,
-        LoadingTitle = texts[language].hubName,
-        ConfigurationSaving = {
-            Enabled = true,
-            FolderName = "StormHubChaos",
-            FileName = "Config"
-        },
-        Discord = { Enabled = false },
-        KeySystem = false
-    })
+-- Criar título
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+title.BorderSizePixel = 0
+title.Text = "Chaos Hub Style"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 24
+title.Parent = frame
 
-    -- Abas (estilo Chaos Hub)
-    local movementTab = window:CreateTab("🏃 " .. texts[language].movement, 12252969349)
-    local teleportTab = window:CreateTab("📍 " .. texts[language].teleport, 12252969349)
-    local trollTab = window:CreateTab("😈 " .. texts[language].troll, 12252969349)
+-- Criar botão fechar
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -35, 0, 5)
+closeButton.BackgroundColor3 = Color3.fromRGB(170, 30, 30)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 20
+closeButton.Parent = frame
 
-    movementTab:CreateButton({
-        Name = texts[language].speed,
-        Callback = function()
-            local plr = game.Players.LocalPlayer
-            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                plr.Character.Humanoid.WalkSpeed = 32
-                Rayfield:Notify({Title = texts[language].movement, Content = "Velocidade x2!", Duration = 3})
-            end
-        end
-    })
+-- Função para fechar a janela
+closeButton.MouseButton1Click:Connect(function()
+    frame.Visible = false
+    openButton.Visible = true
+end)
 
-    teleportTab:CreateButton({
-        Name = texts[language].teleport1,
-        Callback = function()
-            local p = game.Players.LocalPlayer
-            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                p.Character.HumanoidRootPart.CFrame = CFrame.new(100,10,100)
-            end
-        end
-    })
+-- Criar botão abrir (para quando a janela estiver fechada)
+local openButton = Instance.new("TextButton")
+openButton.Size = UDim2.new(0, 100, 0, 40)
+openButton.Position = UDim2.new(0, 10, 0.5, -20)
+openButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+openButton.Text = "Abrir Hub"
+openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+openButton.Font = Enum.Font.SourceSansBold
+openButton.TextSize = 20
+openButton.Visible = false
+openButton.Parent = screenGui
 
-    teleportTab:CreateButton({
-        Name = texts[language].teleport2,
-        Callback = function()
-            local p = game.Players.LocalPlayer
-            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                p.Character.HumanoidRootPart.CFrame = CFrame.new(-100,10,-100)
-            end
-        end
-    })
+openButton.MouseButton1Click:Connect(function()
+    frame.Visible = true
+    openButton.Visible = false
+end)
 
-    trollTab:CreateButton({
-        Name = texts[language].spam,
-        Callback = function()
-            Rayfield:Notify({Title = "Troll", Content = "Spam iniciado! Para parar, reinicie.", Duration = 4})
-            spawn(function()
-                while true do
-                    wait(0.5)
-                    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Chaos Style Spam!", "All")
-                end
-            end)
-        end
-    })
+-- Função para criar botões dentro da interface
+local function createButton(parent, text, yPos, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 320, 0, 40)
+    btn.Position = UDim2.new(0, 15, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+    btn.BorderSizePixel = 0
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.SourceSans
+    btn.TextSize = 20
+    btn.Parent = parent
+
+    btn.MouseButton1Click:Connect(callback)
 end
 
--- Início: loading + seleção do idioma
-local Load = Rayfield:CreateWindow({
-    Name = "Loading",
-    LoadingTitle = "Storm Hub",
-    LoadingSubtitle = "0%",
-    ConfigurationSaving = { Enabled = false }
-})
-
-for i = 1, 100 do
-    wait(0.02)
-    Load:SetLoadingSubtitle(tostring(i).."%")
-end
-Load:Destroy()
-
-local Lang = Rayfield:CreateWindow({
-    Name = "Seleção de Idioma",
-    LoadingTitle = "Escolha o Idioma",
-    ConfigurationSaving = { Enabled = false }
-})
-
-Lang:CreateButton({
-    Name = "Português 🇧🇷",
-    Callback = function()
-        Lang:Destroy()
-        StartHub("pt")
+-- Exemplo de botões dentro do hub
+createButton(frame, "Aumentar Velocidade", 60, function()
+    local player = game.Players.LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = 50
     end
-})
-Lang:CreateButton({
-    Name = "English 🇺🇸",
-    Callback = function()
-        Lang:Destroy()
-        StartHub("en")
+end)
+
+createButton(frame, "Teleporte para Ponto 1", 110, function()
+    local player = game.Players.LocalPlayer
+    if player and player.Character then
+        player.Character:MoveTo(Vector3.new(100, 10, 100))
     end
-})
+end)
+
+createButton(frame, "Spam no Chat", 160, function()
+    spawn(function()
+        while true do
+            wait(0.5)
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Chaos Hub style ativado!", "All")
+        end
+    end)
+end)
